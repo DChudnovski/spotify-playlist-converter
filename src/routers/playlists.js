@@ -5,6 +5,20 @@ const router = new express.Router()
 const axios = require('axios')
 
 
+router.post('/playlists', async (req, res) => {
+    const playlist = new Playlist({
+        ...req.body
+    })
+    try{
+        await playlist.save()
+        res.status(201).send()
+    }catch (e) {
+        res.status(400).send(e)
+    }
+})
+
+router.get('/playlists')
+
 
 router.get('/playlists/:access_token' , async (req, res) => {
     
@@ -78,20 +92,7 @@ router.get('/playlists/:playlistID', async (req, res) => {
     }
 })
 
-router.post('/playlists', async (req,res) => {
-    const playlistInfo = await getPlaylistInfo()
-    const playlist = new Playlist({
-        ...req.body,
-        // owner: req.user._id
-        songs: playlistInfo
-    })
-    try{
-        await playlist.save()
-        res.status(201).send('New Playlist Saved!')
-    } catch (e) {
-        res.status(400).send(e)
-    }
-})
+
 
 // router.get('/playlists/:id' , async (req,res) => {
 //     try {
