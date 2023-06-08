@@ -1,7 +1,9 @@
 const querystring = require('querystring')
 const User = require('../models/user')
 const { getAuthToken, refreshAuthToken } = require('../controllers/authorization')
+const { getSpotifyPlaylists } = require('../controllers/playlists')
 const { getUserSpotify } = require('../controllers/user')
+const express = require('express')
 const router = new express.Router()
 const axios = require('axios')
 
@@ -33,12 +35,12 @@ router.get('/callback', async (req, res) => {
     try {
         const code = req.query.code || null;
         const state = req.query.state || null;
-    
         if (state === null) {
             res.redirect('/#' + querystring.stringify({
                 error: 'state_mismatch'
             }));
         } else {
+            
             const authInfo = await getAuthToken(code)
             const accessToken = await authInfo.access_token
             const refreshToken = await authInfo.refresh_token
@@ -49,7 +51,7 @@ router.get('/callback', async (req, res) => {
             const user = await User.findOne({spotifyID:userID})
 
             if(!user) {
-                //This is where we make a post request to the user router  
+                // This is where we make a post request to the user router  
                 const username = await userSpotify.display_name
                 const newUser = { 
                     name: username,
@@ -59,38 +61,44 @@ router.get('/callback', async (req, res) => {
                         refreshToken:refreshToken
                     }
                 }
-                const postResponse = await axios({
+                const postResponse = axios({
                     method:'post',
-                    url:'/users',
+                    url:'http://localhost:8888/users',
                     data: newUser
                 })
-                res.send(postResponse)
+                postResponse.then(async (response) =>{
+                    const user_id = response.data.spotifyID
+                    const playlistInfo = await getSpotifyPlaylists(user_id)
+                    console.log(playlistInfo)
+
+                    
+                })
+                .catch(async (e) => {
+                    console.log(e)
+                })
+                
             } else {
                 //This is where we make an update request to the user router
-                const tokens = {
-                    accessToken,
-                    refreshToken
-                }
+                // const tokens = {
+                //     accessToken,
+                //     refreshToken
+                // }
                 
-                const patchResponse = await axios({
-                    method:'patch',
-                    url:`/users/${user.spotifyID}`,
-                    data: tokens
-                })
-                const getResponse = await axios({
-                    method:'get',
-                    url:`/users/${user.spotifyID}`
-                })
 
-                const responses = {
-                    res1: patchResponse,
-                    res2: getResponse
-                }
-                res.status(200).send()
-            }
-        }
+                // const getResponse = await axios({
+                    //     method:'get',
+                    //     url:`/users/${user.spotifyID}`
+                    // })
+                    
+                    // const responses = {
+                        //     res1: patchResponse,
+                        //     res2: getResponse
+                        // }
+                        // res.status(200).send()}
+
+                }}
     } catch (e) {
-        console.log(e)
+        res.status(401).send(e)
     }
    
 })

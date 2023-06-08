@@ -8,7 +8,7 @@ router.post('/users', async (req, res) => {
     })
     try{
         await user.save()
-        res.status(201).send()
+        res.status(201).send(user)
     } catch(e){
         res.status(400).send
     }
@@ -27,18 +27,22 @@ router.patch('/users/:id' , async (req, res) => {
     try{
         const user = await User.findOneAndUpdate({spotifyID: req.params.id},{...req.body})
 
+    } catch (e) {
+
     }
 })
 
 router.delete('/users/:id', async (req, res) => {
     try{
         const user = await User.findOneAndDelete({spotifyId: req.params.id})
-    }       
+    } catch (e) {
+        
+    }
 })
 
 
 
-router.get('/users/logout' , async (req,res) => {
+router.get('/logout' , async (req,res) => {
     res.redirect('https://accounts.spotify.com/logout') 
 })
 

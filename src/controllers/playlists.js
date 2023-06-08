@@ -5,17 +5,17 @@ const querystring = require('querystring')
 
 const getSpotifyPlaylists = async (user_id) => {
     try{
-    const user = User.findOne({spotifyID : user_id})
+    const user = await User.findOne({spotifyID : user_id})
     const access_token = user.tokens.spotifyToken
-    const url = 'https://api.spotify.com/v1/me/playlists'
-
+    const url = `https://api.spotify.com/v1/users/${user_id}/playlists`
     const playlistInfo = await axios.get(url, {
         headers: {
             'Authorization' : `Bearer ${access_token}`
         }})
+    const playlistItems = await playlistInfo.items
+    
 
-    console.log(playlistInfo.data)
-
+    return userPlaylists
     // request.get(options, (error, response, body) => {
     //     if(!error){
     //         const playlists = body.items.map((item) => {
@@ -26,14 +26,21 @@ const getSpotifyPlaylists = async (user_id) => {
         
     // })
     } catch (e) {
-        // res.status(400).send(e)
+        return e
     }
 }
 
-const createPlaylist = async (req, res) => {
+const getPlaylistTracks = async (user_id, playlist_id) => {
+    try{
+        const user = await User.findOne({spotifyID : user_id})
+        const access_token = user.tokens.spotifyToken
+        const url = 'https://api.spotify.com/v1/me/playlists'
+    } catch (e) {
 
+    }
 }
 
 module.exports = {
-    getSpotifyPlaylists
+    getSpotifyPlaylists,
+    getPlaylistTracks
 }
