@@ -24,7 +24,7 @@ const getAuthToken = async (code) => {
     }
 }
 
-const refreshAuthToken = async (refresh_token) => {
+const refreshAuthToken = async (user_id) => {
     try{
         const url = 'https://accounts.spotify.com/api/token'
         const tokenParams = Buffer.from(`${process.env.SPOTIFYAPIID}:${process.env.SPOTIFYAPISECRET}` , 'utf-8').toString('base64')
